@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "bun run src/index.ts",
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir=dist --format=cjs"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -15,6 +16,8 @@
   },
   "dependencies": {
     "@types/chalk": "^2.2.4",
-    "chalk": "^5.4.1"
+    "chalk": "^5.4.1",
+    "dayjs": "^1.11.13",
+    "simple-git": "^3.27.0"
   }
 }
