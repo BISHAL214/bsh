@@ -25,7 +25,11 @@ rl.on("line", (line) => {
 });
 
 rl.on("keypress", (_, key) => {
-  if (key.name === "up") {
+  if (key.name === "return") {
+    historyIndex = -1; // Reset history index on enter
+  } else if (key.name === "c" && key.ctrl) {
+    rl.close();
+  } else if (key.name === "up") {
     historyIndex = Math.max(historyIndex - 1, 0);
     rl.write(history[historyIndex] || "");
   } else if (key.name === "down") {

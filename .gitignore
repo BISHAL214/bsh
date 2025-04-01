@@ -5,7 +5,11 @@ node_modules
 out
 dist
 *.tgz
-
+.env
+.env.*
+aliases.json
+history.json
+src/.fuse_hidden*
 # code coverage
 coverage
 *.lcov

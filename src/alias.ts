@@ -14,4 +14,20 @@ export const saveAlias = (key: string, command: string) => {
   fs.writeFileSync(aliasFile, JSON.stringify(aliases, null, 2));
 };
 
-export const getAlias = (key: string) => aliases[key] || null;
+export const resolveAlias = (cmd: string): string => {
+  const visited = new Set<string>();
+  let parts = cmd.split(/\s+/);
+
+  for (let i = 0; i < parts.length; i++) {
+    while (aliases[parts[i]] && !visited.has(parts[i])) {
+      visited.add(parts[i]);
+      const aliasValue = aliases[parts[i]];
+      if (aliasValue) {
+        const aliasParts = aliasValue.trim().split(/\s+/);
+        parts.splice(i, 1, ...aliasParts);
+      }
+    }
+  }
+
+  return parts.join(" ").trim();
+};

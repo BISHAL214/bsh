@@ -1,16 +1,20 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { saveConfig } from "./config";
 import { loadTheme } from "./theme";
-import { saveAlias, getAlias } from "./alias";
+import { resolveAlias, saveAlias } from "./alias";
 import { shellPrompt } from "./prompt";
 import process from "process";
 
 export const executeCommand = (line: string) => {
-  let [cmd, ...args] = line.trim().split(" ");
+  let [cmd, ...args] = line.trim().split(/\s+/);
 
-  const aliasCmd = getAlias(cmd as string);
-  if (aliasCmd) {
-    cmd = aliasCmd;
+  // Resolve the alias dynamically at runtime
+  try {
+    cmd = resolveAlias(cmd as string); // Resolves the alias chain at runtime
+  } catch (error: any) {
+    console.error(error.message);
+    shellPrompt();
+    return;
   }
 
   if (cmd === "exit") {
@@ -20,7 +24,7 @@ export const executeCommand = (line: string) => {
 
   // ✅ FIXED: Built-in `cd` command
   else if ((cmd === "cd" || cmd === "chdir") && args.length > 0) {
-    const targetDir = args[0] || process.env.HOME;
+    const targetDir = args.join(" ") || process.env.HOME;
     try {
       process.chdir(targetDir as string);
     } catch (error) {
@@ -46,11 +50,18 @@ export const executeCommand = (line: string) => {
 
   // ✅ Execute external commands
   else {
-    exec(line, (error, stdout, stderr) => {
-      if (error) console.log(`Error: ${error.message}`);
-      if (stderr) console.log(`stderr: ${stderr}`);
-      if (stdout) console.log(stdout);
-      shellPrompt(); // ✅ Always show prompt after execution
+    const child = spawn(cmd as string, args, {
+      stdio: "inherit",
+      shell: true,
+    });
+    child.on("error", (error) => {
+      console.error(`Error executing command: ${error.message}`);
+    });
+    child.on("close", (code) => {
+      if (code !== 0) {
+        console.error(`Command closed with code: ${code}`);
+      }
+      shellPrompt();
     });
   }
 };
